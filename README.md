@@ -9,7 +9,7 @@ Built for the CCI *Visualisation and Sensing* project.
 
 ## What it does
 
-- A **choropleth map** (Leaflet) shades each borough by its tree count — darker
+- A **choropleth map** (Leaflet) shades each borough by its tree count: darker
   greens mean more trees. Hover a borough to see its exact figure.
 - A **ranked bar chart** (D3) lists every borough, sortable by tree count or
   alphabetically.
@@ -32,14 +32,14 @@ in a browser. `aggregate.py` reduces it **once, offline** to a small
 
 | File | Purpose |
 |------|---------|
-| `index.html` | The whole site — map, chart, styling and logic in one file |
+| `index.html` | The whole site: map, chart, styling and logic in one file |
 | `borough_counts.json` | Aggregated data the site loads (borough → tree count) |
 | `boroughs.geojson` | London borough boundary polygons for the map |
 | `aggregate.py` | Script that generates `borough_counts.json` from the raw CSV |
 
 ## Running it
 
-It's a static site — no build step. Because the browser loads local files
+It's a static site with no build step. Because the browser loads local files
 (`borough_counts.json`, `boroughs.geojson`), open it through a web server rather
 than `file://`:
 
