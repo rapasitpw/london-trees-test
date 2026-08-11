@@ -1,0 +1,167 @@
+{
+  "Enfield": {
+    "count": 109897,
+    "area_km2": 82.22,
+    "per_km2": 1336.7
+  },
+  "Ealing": {
+    "count": 67328,
+    "area_km2": 55.54,
+    "per_km2": 1212.3
+  },
+  "Bromley": {
+    "count": 65423,
+    "area_km2": 150.19,
+    "per_km2": 435.6
+  },
+  "Southwark": {
+    "count": 58712,
+    "area_km2": 29.9,
+    "per_km2": 1963.3
+  },
+  "Richmond upon Thames": {
+    "count": 55502,
+    "area_km2": 58.77,
+    "per_km2": 944.4
+  },
+  "Wandsworth": {
+    "count": 52471,
+    "area_km2": 35.22,
+    "per_km2": 1489.8
+  },
+  "Barnet": {
+    "count": 51848,
+    "area_km2": 86.76,
+    "per_km2": 597.6
+  },
+  "Redbridge": {
+    "count": 47309,
+    "area_km2": 56.46,
+    "per_km2": 837.9
+  },
+  "Waltham Forest": {
+    "count": 46396,
+    "area_km2": 38.82,
+    "per_km2": 1195.0
+  },
+  "Hounslow": {
+    "count": 39742,
+    "area_km2": 56.61,
+    "per_km2": 702.1
+  },
+  "Harrow": {
+    "count": 39043,
+    "area_km2": 50.48,
+    "per_km2": 773.4
+  },
+  "Greenwich": {
+    "count": 37306,
+    "area_km2": 50.41,
+    "per_km2": 740.1
+  },
+  "Lewisham": {
+    "count": 36363,
+    "area_km2": 35.32,
+    "per_km2": 1029.4
+  },
+  "Newham": {
+    "count": 36207,
+    "area_km2": 38.65,
+    "per_km2": 936.7
+  },
+  "Lambeth": {
+    "count": 35526,
+    "area_km2": 27.26,
+    "per_km2": 1303.2
+  },
+  "Merton": {
+    "count": 35444,
+    "area_km2": 37.63,
+    "per_km2": 942.0
+  },
+  "Islington": {
+    "count": 34883,
+    "area_km2": 14.86,
+    "per_km2": 2346.9
+  },
+  "Westminster": {
+    "count": 34089,
+    "area_km2": 22.04,
+    "per_km2": 1546.7
+  },
+  "Hackney": {
+    "count": 33085,
+    "area_km2": 19.07,
+    "per_km2": 1735.0
+  },
+  "Haringey": {
+    "count": 32123,
+    "area_km2": 29.6,
+    "per_km2": 1085.4
+  },
+  "Hillingdon": {
+    "count": 29237,
+    "area_km2": 115.72,
+    "per_km2": 252.7
+  },
+  "Tower Hamlets": {
+    "count": 28026,
+    "area_km2": 21.57,
+    "per_km2": 1299.2
+  },
+  "Brent": {
+    "count": 26672,
+    "area_km2": 43.25,
+    "per_km2": 616.8
+  },
+  "Camden": {
+    "count": 26323,
+    "area_km2": 21.8,
+    "per_km2": 1207.7
+  },
+  "Bexley": {
+    "count": 20413,
+    "area_km2": 64.28,
+    "per_km2": 317.6
+  },
+  "Barking and Dagenham": {
+    "count": 15071,
+    "area_km2": 37.79,
+    "per_km2": 398.8
+  },
+  "Kingston upon Thames": {
+    "count": 12709,
+    "area_km2": 37.27,
+    "per_km2": 341.0
+  },
+  "Sutton": {
+    "count": 10187,
+    "area_km2": 43.85,
+    "per_km2": 232.3
+  },
+  "Hammersmith and Fulham": {
+    "count": 9351,
+    "area_km2": 17.16,
+    "per_km2": 544.8
+  },
+  "Kensington and Chelsea": {
+    "count": 4433,
+    "area_km2": 12.39,
+    "per_km2": 357.7
+  },
+  "Havering": {
+    "count": 2062,
+    "area_km2": 114.49,
+    "per_km2": 18.0
+  },
+  "City of London": {
+    "count": 1623,
+    "area_km2": 3.15,
+    "per_km2": 514.7
+  },
+  "Croydon": {
+    "count": 1209,
+    "area_km2": 86.54,
+    "per_km2": 14.0
+  }
+}

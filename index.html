@@ -13,14 +13,14 @@
 
 <style>
   :root{
-    --ink:#1b2a1f;          /* deep forest, near-black */
-    --paper:#f6f4ec;        /* warm off-white */
+    --ink:#1b2a1f;
+    --paper:#f6f4ec;
     --panel:#fffdf7;
     --line:#d9d6c8;
     --muted:#6b7267;
-    --accent:#3f6b3a;       /* mid canopy green */
+    --accent:#3f6b3a;
     --accent-deep:#22401f;
-    --highlight:#c8622d;    /* terracotta, used ONLY for selection */
+    --highlight:#c8622d;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
@@ -55,6 +55,19 @@
   }
   .total-line b{font-size:15px}
 
+  /* the measure toggle */
+  .measure{
+    display:flex;align-items:center;gap:8px;margin-top:16px;
+    font-family:"Helvetica Neue",Arial,sans-serif;font-size:13px;color:var(--muted);
+  }
+  .measure .seg{display:inline-flex;border:1px solid var(--ink);border-radius:4px;overflow:hidden}
+  .measure .seg button{
+    font:inherit;border:0;padding:7px 15px;cursor:pointer;background:var(--paper);color:var(--ink);
+    letter-spacing:.02em;
+  }
+  .measure .seg button + button{border-left:1px solid var(--ink)}
+  .measure .seg button.on{background:var(--ink);color:var(--paper)}
+
   .grid{
     display:grid;grid-template-columns:1.15fr .85fr;gap:22px;
     align-items:start;
@@ -73,19 +86,12 @@
   }
   #map{height:520px;width:100%;background:#eceadf}
 
-  /* chart */
   .chart-body{padding:6px 8px 14px}
   .bar rect{cursor:pointer;transition:opacity .15s}
   .bar:hover rect{opacity:.78}
   .bar.selected rect{fill:var(--highlight)!important}
-  .bar-label{
-    font-family:"Helvetica Neue",Arial,sans-serif;font-size:11px;fill:var(--ink);
-  }
-  .bar-value{
-    font-family:"Helvetica Neue",Arial,sans-serif;font-size:10px;fill:var(--muted);
-  }
-  .axis text{font-family:"Helvetica Neue",Arial,sans-serif;font-size:10px;fill:var(--muted)}
-  .axis path,.axis line{stroke:var(--line)}
+  .bar-label{font-family:"Helvetica Neue",Arial,sans-serif;font-size:11px;fill:var(--ink)}
+  .bar-value{font-family:"Helvetica Neue",Arial,sans-serif;font-size:10px;fill:var(--muted)}
 
   .controls{
     display:flex;gap:10px;align-items:center;padding:10px 16px;
@@ -98,7 +104,6 @@
   }
   .controls button:hover{background:var(--accent-deep)}
 
-  /* leaflet tooltip restyle */
   .leaflet-tooltip.tree-tip{
     background:var(--ink);color:var(--paper);border:0;box-shadow:none;
     font-family:"Helvetica Neue",Arial,sans-serif;padding:6px 9px;border-radius:3px;
@@ -112,6 +117,11 @@
     font-size:11px;color:var(--muted);
   }
   .legend i{width:16px;height:12px;display:inline-block;margin-right:6px;vertical-align:-1px;opacity:.9}
+
+  .caption{
+    font-family:"Helvetica Neue",Arial,sans-serif;font-size:12px;color:var(--muted);
+    padding:0 16px 14px;line-height:1.5;
+  }
 
   footer.notes{
     margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
@@ -128,14 +138,23 @@
     <h1>London's Street Trees</h1>
     <p class="standfirst">
       Over a million publicly maintained trees line London's streets and open
-      spaces, but they are spread unevenly. Explore how many each borough holds.
+      spaces, but they are spread unevenly. Explore how many each borough holds,
+      then switch to density to compare them fairly.
     </p>
     <p class="total-line" id="totalLine">Loading tree data…</p>
+
+    <div class="measure">
+      <span>Measure:</span>
+      <span class="seg">
+        <button id="mTotal" class="on">Total trees</button>
+        <button id="mDens">Trees per km&sup2;</button>
+      </span>
+    </div>
   </header>
 
   <div class="grid">
     <section class="card">
-      <h2>Trees per borough: hover to inspect, click a bar to locate</h2>
+      <h2 id="mapTitle">Total trees per borough: hover to inspect, click to locate</h2>
       <div id="map"></div>
     </section>
 
@@ -143,22 +162,25 @@
       <h2>Boroughs ranked</h2>
       <div class="controls">
         <span>Order:</span>
-        <button id="sortCount">Most trees</button>
+        <button id="sortValue">Highest</button>
         <button id="sortName">A-Z</button>
       </div>
       <div class="chart-body">
         <svg id="chart" width="100%" height="900"></svg>
       </div>
+      <p class="caption" id="chartCaption"></p>
     </section>
   </div>
 
   <footer class="notes">
-    <strong>About this map.</strong> Each borough is shaded by the number of
-    publicly maintained trees recorded in it: darker means more. Figures come from
-    the Greater London Authority's public realm tree inventory
-    (<span id="footTotal">…</span> trees in total). Some boroughs, notably Croydon,
-    Havering and the City of London, appear very low because they released only
-    partial data, not because they lack trees. Data:
+    <strong>About this map.</strong> Boroughs are shaded either by their total
+    number of publicly maintained trees, or by trees per square kilometre. Raw
+    totals favour large boroughs, so the density view gives a fairer comparison:
+    switching to it reshuffles the ranking. Figures come from the Greater London
+    Authority's public realm tree inventory (<span id="footTotal">…</span> trees
+    in total). Some boroughs, notably Croydon, Havering and the City of London,
+    appear very low because they released only partial data, not because they
+    lack trees. Borough areas are computed from the boundary polygons. Data:
     <a href="https://data.london.gov.uk/dataset/local-authority-maintained-trees/" target="_blank" rel="noopener">London Datastore</a>,
     under the UK Open Government Licence.
   </footer>
@@ -166,42 +188,68 @@
 </div>
 
 <script>
-// ---- palette for the choropleth (light -> deep canopy green) ----
+// green ramp, light to deep canopy
 const GREENS = ["#e7ecdf","#c7d6b3","#9dbb85","#6f9a5b","#4a7d3f","#2f5d2a","#22401f"];
 
-// state shared between map and chart
-let boroughCounts = {};      // { "Enfield": 109897, ... }
-let colorFor = () => "#ccc"; // set once data + scale ready
-let geoLayer = null;         // leaflet layer, keyed by borough for highlight
-let selected = null;         // currently selected borough name
+// per-measure configuration: how to read the value, colour thresholds, legend text, labels
+const MEASURES = {
+  count: {
+    get: d => d.count,
+    thresholds: [2000,10000,25000,40000,60000,90000],
+    legendTitle: "Trees per borough",
+    legendLabels: ["< 2k","2k-10k","10k-25k","25k-40k","40k-60k","60k-90k","90k +"],
+    fmt: v => Math.round(v).toLocaleString(),
+    unit: "trees",
+    mapTitle: "Total trees per borough: hover to inspect, click to locate",
+    caption: "Total number of trees recorded in each borough. Large outer boroughs tend to rank highly simply because they cover more ground."
+  },
+  per_km2: {
+    get: d => d.per_km2,
+    thresholds: [250,500,800,1100,1500,2000],
+    legendTitle: "Trees per km\u00B2",
+    legendLabels: ["< 250","250-500","500-800","800-1.1k","1.1k-1.5k","1.5k-2k","2k +"],
+    fmt: v => Math.round(v).toLocaleString(),
+    unit: "trees / km\u00B2",
+    mapTitle: "Trees per km\u00B2 by borough: hover to inspect, click to locate",
+    caption: "Trees per square kilometre. Normalising by area reshuffles the ranking: dense inner boroughs such as Islington rise to the top, while large boroughs such as Enfield fall."
+  }
+};
 
-// ---- load the two data files, then build everything ----
+// shared state
+let DATA = {};          // { name: {count, area_km2, per_km2} }
+let MODE = "count";     // active measure key
+let scale = null;       // current d3 threshold colour scale
+let geoLayer = null;    // leaflet layer
+let selected = null;    // selected borough name
+
+// value + colour helpers read from the active measure
+const valOf   = name => (name in DATA) ? MEASURES[MODE].get(DATA[name]) : 0;
+const colorFor = name => (name in DATA) ? scale(valOf(name)) : "#eceadf";
+
+function makeScale(){
+  scale = d3.scaleThreshold().domain(MEASURES[MODE].thresholds).range(GREENS);
+}
+
+// load data + boundaries, then build
 Promise.all([
-  d3.json("borough_counts.json"),
+  d3.json("borough_data.json"),
   d3.json("boroughs.geojson")
-]).then(([counts, geo]) => {
-  boroughCounts = counts;
+]).then(([data, geo]) => {
+  DATA = data;
 
-  const values = Object.values(counts);
-  const total  = d3.sum(values);
-  const max    = d3.max(values);
-
+  const total = d3.sum(Object.values(data), d => d.count);
   document.getElementById("totalLine").innerHTML =
-    `<b>${total.toLocaleString()}</b> trees mapped across ${Object.keys(counts).length} boroughs`;
+    `<b>${total.toLocaleString()}</b> trees mapped across ${Object.keys(data).length} boroughs`;
   document.getElementById("footTotal").textContent = total.toLocaleString();
 
-  // quantile-ish scale using a power curve so the long tail stays readable
-  const scale = d3.scaleThreshold()
-    .domain([2000,10000,25000,40000,60000,90000])
-    .range(GREENS);
-  colorFor = b => (b in counts) ? scale(counts[b]) : "#eceadf";
-
+  makeScale();
   buildMap(geo);
   buildChart();
-  buildLegend(scale);
+  buildLegend();
+  applyMeasureText();
 }).catch(err => {
   document.getElementById("totalLine").textContent =
-    "Could not load data files. Check borough_counts.json and boroughs.geojson are present.";
+    "Could not load data files. Check borough_data.json and boroughs.geojson are present.";
   console.error(err);
 });
 
@@ -221,41 +269,51 @@ function styleFeature(feature){
   };
 }
 
+function tooltipHtml(name){
+  const m = MEASURES[MODE];
+  const v = (name in DATA) ? m.fmt(m.get(DATA[name])) : "no data";
+  return `<b>${name}</b><br><span>${v} ${m.unit}</span>`;
+}
+
 function buildMap(geo){
   geoLayer = L.geoJSON(geo,{
     style: styleFeature,
     onEachFeature: (feature, layer) => {
       const name = feature.properties.name;
-      const n = boroughCounts[name] || 0;
-      layer.bindTooltip(
-        `<b>${name}</b><br><span>${n.toLocaleString()} trees</span>`,
-        {className:"tree-tip", sticky:true}
-      );
+      layer.bindTooltip(tooltipHtml(name), {className:"tree-tip", sticky:true});
       layer.on({
         mouseover: e => e.target.setStyle({weight:2, color:"#3f6b3a"}),
         mouseout:  e => geoLayer.resetStyle(e.target),
         click:     () => selectBorough(name)
       });
-      layer._boroughName = name; // for highlight lookup
+      layer._boroughName = name;
     }
   }).addTo(map);
 }
 
+function refreshMap(){
+  if(!geoLayer) return;
+  geoLayer.eachLayer(l => {
+    l.setStyle(styleFeature(l.feature));
+    l.setTooltipContent(tooltipHtml(l._boroughName));
+  });
+}
+
 // ============================ CHART ============================
 const svg = d3.select("#chart");
-const M = {top:8, right:46, left:132, bottom:8};
+const M = {top:8, right:52, left:132, bottom:8};
 let barData = [];
-let currentSort = "count";
+let currentSort = "value";
 
 function buildChart(){
-  barData = Object.entries(boroughCounts)
-    .map(([name,count]) => ({name,count}));
+  barData = Object.keys(DATA).map(name => ({name}));
   drawBars();
 }
 
 function drawBars(){
-  // sort
-  if(currentSort === "count") barData.sort((a,b)=>b.count-a.count);
+  const m = MEASURES[MODE];
+
+  if(currentSort === "value") barData.sort((a,b)=>valOf(b.name)-valOf(a.name));
   else barData.sort((a,b)=>d3.ascending(a.name,b.name));
 
   const rowH = 24;
@@ -264,7 +322,7 @@ function drawBars(){
   svg.attr("height",height);
 
   const x = d3.scaleLinear()
-    .domain([0, d3.max(barData,d=>d.count)])
+    .domain([0, d3.max(barData, d=>valOf(d.name))])
     .range([M.left, width - M.right]);
 
   const y = d3.scaleBand()
@@ -272,15 +330,14 @@ function drawBars(){
     .range([M.top, M.top + barData.length*rowH])
     .padding(0.18);
 
-  const bars = svg.selectAll("g.bar")
-    .data(barData, d=>d.name);
+  const bars = svg.selectAll("g.bar").data(barData, d=>d.name);
 
-  const barsEnter = bars.enter().append("g").attr("class","bar");
-  barsEnter.append("rect");
-  barsEnter.append("text").attr("class","bar-label");
-  barsEnter.append("text").attr("class","bar-value");
+  const enter = bars.enter().append("g").attr("class","bar");
+  enter.append("rect");
+  enter.append("text").attr("class","bar-label");
+  enter.append("text").attr("class","bar-value");
 
-  const merged = barsEnter.merge(bars);
+  const merged = enter.merge(bars);
   merged.classed("selected", d => d.name === selected)
     .on("click", (e,d)=>selectBorough(d.name));
 
@@ -291,7 +348,7 @@ function drawBars(){
     .attr("x", M.left)
     .attr("height", y.bandwidth())
     .transition().duration(500)
-    .attr("width", d => x(d.count)-M.left)
+    .attr("width", d => x(valOf(d.name))-M.left)
     .attr("fill", d => colorFor(d.name));
 
   merged.select(".bar-label")
@@ -303,13 +360,14 @@ function drawBars(){
     .attr("y", y.bandwidth()/2)
     .attr("dominant-baseline","central")
     .transition().duration(500)
-    .attr("x", d => x(d.count)+5)
+    .attr("x", d => x(valOf(d.name))+5)
     .attr("text-anchor","start")
     .tween("text", function(d){
       const self = d3.select(this);
       const start = +self.attr("data-v") || 0;
-      const i = d3.interpolateNumber(start, d.count);
-      return t => { const v=i(t); self.attr("data-v",v); self.text(Math.round(v).toLocaleString()); };
+      const end = valOf(d.name);
+      const i = d3.interpolateNumber(start, end);
+      return t => { const v=i(t); self.attr("data-v",v); self.text(m.fmt(v)); };
     });
 
   bars.exit().remove();
@@ -317,10 +375,10 @@ function drawBars(){
 
 // ---- selection links chart <-> map ----
 function selectBorough(name){
-  selected = (selected === name) ? null : name;   // click again to deselect
+  selected = (selected === name) ? null : name;
   drawBars();
   if(geoLayer){
-    geoLayer.eachLayer(l=>geoLayer.resetStyle(l));
+    geoLayer.eachLayer(l=>l.setStyle(styleFeature(l.feature)));
     if(selected){
       geoLayer.eachLayer(l=>{
         if(l._boroughName === selected){
@@ -335,25 +393,49 @@ function selectBorough(name){
   }
 }
 
-// buttons
-document.getElementById("sortCount").onclick = ()=>{currentSort="count"; drawBars();};
-document.getElementById("sortName").onclick  = ()=>{currentSort="name";  drawBars();};
-
 // ============================ LEGEND ============================
-function buildLegend(scale){
-  const brk = [0,2000,10000,25000,40000,60000,90000];
-  const labels = ["< 2k","2k-10k","10k-25k","25k-40k","40k-60k","60k-90k","90k +"];
-  const legend = L.control({position:"bottomright"});
-  legend.onAdd = function(){
+let legendControl = null;
+function buildLegend(){
+  legendControl = L.control({position:"bottomright"});
+  legendControl.onAdd = function(){
     const div = L.DomUtil.create("div","legend");
-    div.innerHTML = "<div style='margin-bottom:5px;color:#1b2a1f'><b>Trees per borough</b></div>";
-    labels.forEach((lab,i)=>{
-      div.innerHTML += `<div><i style="background:${GREENS[i]}"></i>${lab}</div>`;
-    });
+    renderLegend(div);
+    this._div = div;
     return div;
   };
-  legend.addTo(map);
+  legendControl.addTo(map);
 }
+function renderLegend(div){
+  const m = MEASURES[MODE];
+  div.innerHTML = `<div style='margin-bottom:5px;color:#1b2a1f'><b>${m.legendTitle}</b></div>`;
+  m.legendLabels.forEach((lab,i)=>{
+    div.innerHTML += `<div><i style="background:${GREENS[i]}"></i>${lab}</div>`;
+  });
+}
+
+// ============================ MEASURE SWITCHING ============================
+function applyMeasureText(){
+  const m = MEASURES[MODE];
+  document.getElementById("mapTitle").textContent = m.mapTitle;
+  document.getElementById("chartCaption").textContent = m.caption;
+}
+
+function setMeasure(mode){
+  if(mode === MODE) return;
+  MODE = mode;
+  document.getElementById("mTotal").classList.toggle("on", mode==="count");
+  document.getElementById("mDens").classList.toggle("on", mode==="per_km2");
+  makeScale();
+  refreshMap();
+  drawBars();
+  if(legendControl && legendControl._div) renderLegend(legendControl._div);
+  applyMeasureText();
+}
+
+document.getElementById("mTotal").onclick = ()=>setMeasure("count");
+document.getElementById("mDens").onclick  = ()=>setMeasure("per_km2");
+document.getElementById("sortValue").onclick = ()=>{currentSort="value"; drawBars();};
+document.getElementById("sortName").onclick  = ()=>{currentSort="name";  drawBars();};
 </script>
 </body>
 </html>

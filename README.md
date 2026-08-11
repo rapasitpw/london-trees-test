@@ -11,8 +11,12 @@ Built for the CCI *Visualisation and Sensing* project.
 
 - A **choropleth map** (Leaflet) shades each borough by its tree count: darker
   greens mean more trees. Hover a borough to see its exact figure.
-- A **ranked bar chart** (D3) lists every borough, sortable by tree count or
+- A **ranked bar chart** (D3) lists every borough, sortable by value or
   alphabetically.
+- A **measure toggle** switches both the map and the chart between total trees
+  and trees per km². Raw totals favour large boroughs, so the density view
+  gives a fairer comparison, and switching to it reshuffles the ranking (small
+  inner boroughs such as Islington rise; large ones such as Enfield fall).
 - The map and chart are **linked**: click a bar or a borough to highlight it in
   both views and zoom the map to it.
 
@@ -33,9 +37,9 @@ in a browser. `aggregate.py` reduces it **once, offline** to a small
 | File | Purpose |
 |------|---------|
 | `index.html` | The whole site: map, chart, styling and logic in one file |
-| `borough_counts.json` | Aggregated data the site loads (borough → tree count) |
+| `borough_data.json` | Aggregated data the site loads (per borough: tree count, area, trees per km²) |
 | `boroughs.geojson` | London borough boundary polygons for the map |
-| `aggregate.py` | Script that generates `borough_counts.json` from the raw CSV |
+| `aggregate.py` | Script that generates `borough_data.json` from the raw CSV and the boundaries |
 
 ## Running it
 
@@ -53,8 +57,9 @@ Or just deploy the folder to GitHub Pages.
 ## Re-generating the data
 
 ```bash
-# place Borough_tree_list_2025Nov.csv (from the London Datastore) alongside aggregate.py
-python aggregate.py   # writes borough_counts.json
+# needs Borough_tree_list_2025Nov.csv (London Datastore) and boroughs.geojson present
+pip install shapely pyproj
+python aggregate.py   # writes borough_data.json
 ```
 
 ## Built with
