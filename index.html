@@ -128,14 +128,14 @@
     <h1>London's Street Trees</h1>
     <p class="standfirst">
       Over a million publicly maintained trees line London's streets and open
-      spaces — but they are spread unevenly. Explore how many each borough holds.
+      spaces, but they are spread unevenly. Explore how many each borough holds.
     </p>
     <p class="total-line" id="totalLine">Loading tree data…</p>
   </header>
 
   <div class="grid">
     <section class="card">
-      <h2>Trees per borough &mdash; hover to inspect, click a bar to locate</h2>
+      <h2>Trees per borough: hover to inspect, click a bar to locate</h2>
       <div id="map"></div>
     </section>
 
@@ -144,7 +144,7 @@
       <div class="controls">
         <span>Order:</span>
         <button id="sortCount">Most trees</button>
-        <button id="sortName">A–Z</button>
+        <button id="sortName">A-Z</button>
       </div>
       <div class="chart-body">
         <svg id="chart" width="100%" height="900"></svg>
@@ -156,8 +156,8 @@
     <strong>About this map.</strong> Each borough is shaded by the number of
     publicly maintained trees recorded in it: darker means more. Figures come from
     the Greater London Authority's public realm tree inventory
-    (<span id="footTotal">…</span> trees in total). Some boroughs — notably Croydon,
-    Havering and the City of London — appear very low because they released only
+    (<span id="footTotal">…</span> trees in total). Some boroughs, notably Croydon,
+    Havering and the City of London, appear very low because they released only
     partial data, not because they lack trees. Data:
     <a href="https://data.london.gov.uk/dataset/local-authority-maintained-trees/" target="_blank" rel="noopener">London Datastore</a>,
     under the UK Open Government Licence.
@@ -342,7 +342,7 @@ document.getElementById("sortName").onclick  = ()=>{currentSort="name";  drawBar
 // ============================ LEGEND ============================
 function buildLegend(scale){
   const brk = [0,2000,10000,25000,40000,60000,90000];
-  const labels = ["< 2k","2k–10k","10k–25k","25k–40k","40k–60k","60k–90k","90k +"];
+  const labels = ["< 2k","2k-10k","10k-25k","25k-40k","40k-60k","60k-90k","90k +"];
   const legend = L.control({position:"bottomright"});
   legend.onAdd = function(){
     const div = L.DomUtil.create("div","legend");
